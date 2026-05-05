@@ -142,7 +142,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         if (chatLog.length === 0) {
-            pushMessage('assistant', "🙏 Welcome to **SunaihaScriptureAi**. I am your professional Biblical Scholar. \n\nI can compare Prophets, analyze your moods with scripture, and provide deep historical insights in any language. How can I assist your study today?");
+            pushMessage('assistant', "🙏 Welcome to **SunaihaScriptureAi**. I am your professional Biblical Scholar. \n\n analyze your moods with scripture, and provide deep historical insights in any language. How can I assist your study today?");
         } else {
             chatLog.forEach(m => displayUI(m.role, m.content, false));
         }
