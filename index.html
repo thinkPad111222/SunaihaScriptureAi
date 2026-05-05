@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SunaihaScriptureAi | Biblical Intelligence</title>
+    
+    <!-- Dependencies: Tailwind, FontAwesome, Marked.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .glass-header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #chatDisplay {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        .message-wrapper {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-bubble {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 20px 20px 0 20px;
+            max-width: 85%;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+        }
+        .ai-bubble {
+            align-self: flex-start;
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 1.25rem;
+            border-radius: 20px 20px 20px 0;
+            max-width: 85%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Markdown Overrides */
+        .markdown-body h2 { color: #a855f7; font-weight: 800; margin: 1rem 0 0.5rem; border-bottom: 1px solid #334155; }
+        .markdown-body p { margin-bottom: 0.75rem; line-height: 1.7; }
+        .markdown-body ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+        .markdown-body th, .markdown-body td { border: 1px solid #334155; padding: 8px; text-align: left; }
+        
+        .mic-active { color: #ef4444 !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <!-- App Bar -->
+    <header class="glass-header px-6 py-4 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <i class="fas fa-dove text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-extrabold tracking-tight">Sunaiha<span class="text-indigo-400">ScriptureAi</span></h1>
+                <p class="text-[10px] text-slate-500 font-bold uppercase">Dev: 
+                        <a href="https://facebook.com/sunaiha.sabir" class="text-[10px] text-slate-500 font-bold uppercase" target="_blank" class="text-slate-400 hover:text-blue-500 transition text-xl">
+                Sunaiha Sabir
+                
+                    
+                    & 
+                      <a href="https://facebook.com/sharoz.ifrahim" class="text-[10px] text-slate-500 font-bold uppercase" target="_blank" class="text-slate-400 hover:text-blue-500 transition text-xl">
+                Sharoz Ifrahim
+                
+            </a>
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-5">
+            <a href="https://facebook.com/sunaiha.sabir" target="_blank" class="text-slate-400 hover:text-blue-500 transition text-xl">
+                <i class="fab fa-facebook"></i>
+              
+            </a>
+           
+            <button onclick="clearAllData()" class="text-slate-400 hover:text-red-500 transition">
+                <i class="fas fa-trash-can"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Chat Viewport -->
+    <main id="chatDisplay" class="p-4 md:p-8 space-y-4"></main>
+
+    <!-- Typing Indicator -->
+    <div id="loader" class="hidden px-8 py-2 text-xs text-indigo-400 flex items-center gap-2">
+        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
+        Studying the scriptures...
+    </div>
+
+    <!-- Input Control -->
+    <footer class="p-4 bg-slate-950/80 border-t border-white/5">
+        <div class="max-w-4xl mx-auto flex items-center gap-2 glass-header rounded-2xl p-2 shadow-2xl">
+            <button id="micBtn" onclick="runVoiceInput()" class="w-12 h-12 flex items-center justify-center text-slate-400 hover:text-indigo-400 transition">
+                <i class="fas fa-microphone-lines text-xl"></i>
+            </button>
+            <input id="userIn" type="text" placeholder="Compare Prophets, search moods, or ask for 100 verses..." 
+                   class="flex-1 bg-transparent border-none focus:ring-0 text-white p-2">
+            <button onclick="sendPrompt()" class="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-xl flex items-center justify-center transition">
+                <i class="fas fa-paper-plane text-white"></i>
+            </button>
+        </div>
+    </footer>
+
+    <script type="module">
+    import { Groq } from "https://esm.run/groq-sdk";
+
+    // CONFIGURATION
+    const API_KEY = "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";
+    const groq = new Groq({ apiKey: API_KEY, dangerouslyAllowBrowser: true });
+    const STORAGE_KEY = "sunaiha_scripture_v3";
+
+    const chatDisplay = document.getElementById('chatDisplay');
+    const userIn = document.getElementById('userIn');
+    const loader = document.getElementById('loader');
+    const micBtn = document.getElementById('micBtn');
+
+    // Retrieve history - Ensure we use valid API roles
+    let chatLog = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (chatLog.length === 0) {
+            pushMessage('assistant', "🙏 Welcome to **SunaihaScriptureAi**. I am your professional Biblical Scholar. \n\nI can compare Prophets, analyze your moods with scripture, and provide deep historical insights in any language. How can I assist your study today?");
+        } else {
+            chatLog.forEach(m => displayUI(m.role, m.content, false));
+        }
+    });
+
+    // Speech-to-Text
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.onstart = () => micBtn.classList.add('mic-active');
+        recognition.onend = () => micBtn.classList.remove('mic-active');
+        recognition.onresult = (e) => {
+            userIn.value = e.results[0][0].transcript;
+            sendPrompt();
+        };
+        window.runVoiceInput = () => recognition.start();
+    }
+
+    // Text-to-Speech
+    window.narrate = (text) => {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text.replace(/[#*`]/g, ''));
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // Main Logic
+    window.sendPrompt = async (forcedText = null) => {
+        const text = forcedText || userIn.value.trim();
+        if (!text) return;
+
+        displayUI('user', text);
+        userIn.value = '';
+        loader.classList.remove('hidden');
+
+        try {
+            const systemPrompt = `You are SunaihaScriptureAi. 
+            - Provide deep Biblical insights with emojis.
+            - If a user asks for 100 verses/articles or "more", provide a structured response and ALWAYS append the tag [LOAD_MORE_UI] at the end.
+            - Support multiple languages.
+            - Create comparison tables for Prophets vs God.
+            - Mention developer Sunaiha Sabir if asked.`;
+
+            // CRITICAL FIX: Ensure 'role' is only 'system', 'user', or 'assistant'
+            const apiMessages = [
+                { role: "system", content: systemPrompt },
+                ...chatLog.slice(-6).map(msg => ({
+                    role: msg.role === 'ai' ? 'assistant' : msg.role, 
+                    content: msg.content
+                })),
+                { role: "user", content: text }
+            ];
+
+            const chatCompletion = await groq.chat.completions.create({
+                messages: apiMessages,
+                model: "llama-3.3-70b-versatile",
+                temperature: 0.6
+            });
+
+            const aiText = chatCompletion.choices[0].message.content;
+            loader.classList.add('hidden');
+            
+            // Save as 'assistant' to satisfy the API discriminator
+            pushMessage('assistant', aiText);
+
+        } catch (err) {
+            loader.classList.add('hidden');
+            displayUI('assistant', "⚠️ **Connection Error:** " + err.message);
+        }
+    };
+
+    function pushMessage(role, content) {
+        chatLog.push({ role, content });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(chatLog));
+        displayUI(role, content);
+    }
+
+    function displayUI(role, content, scroll = true) {
+        const div = document.createElement('div');
+        div.className = "message-wrapper";
+        
+        let processedContent = content;
+        if (content.includes('[LOAD_MORE_UI]')) {
+            processedContent = content.replace('[LOAD_MORE_UI]', `
+                <div class="mt-4 border-t border-indigo-500/20 pt-4">
+                    <button onclick="sendPrompt('Provide the next 50 deep verses and articles regarding our current topic')" 
+                            class="w-full py-3 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-600/30 font-bold transition">
+                        <i class="fas fa-plus-circle mr-2"></i> Load More (100+ Total)
+                    </button>
+                </div>
+            `);
+        }
+
+        div.innerHTML = `
+            <div class="${role === 'user' ? 'user-bubble' : 'ai-bubble'}">
+                <div class="markdown-body">${marked.parse(processedContent)}</div>
+                ${role === 'assistant' ? `
+                    <div class="flex items-center gap-4 mt-3 pt-3 border-t border-white/5">
+                        <button onclick="narrate(\`${content.replace(/[`']/g, "")}\`)" class="text-[10px] uppercase font-bold tracking-widest text-indigo-400 hover:text-white">
+                            <i class="fas fa-volume-high mr-1"></i> Speak
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        chatDisplay.appendChild(div);
+        if (scroll) chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    }
+
+    window.clearAllData = () => {
+        if (confirm("Delete all chat history from this app?")) {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+    };
+
+    userIn.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendPrompt(); });
+</script>
+</body>
+</html>
