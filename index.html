@@ -128,7 +128,7 @@
     import { Groq } from "https://esm.run/groq-sdk";
 
     // CONFIGURATION
-    const API_KEY ="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";
+    const API_KEY ="";
     const groq = new Groq({ apiKey: API_KEY, dangerouslyAllowBrowser: true });
     const STORAGE_KEY = "sunaiha_scripture_v3";
 
@@ -210,7 +210,7 @@
 
         } catch (err) {
             loader.classList.add('hidden');
-            displayUI('assistant', "⚠️ **Connection Error:** something went wrong please try again later " );
+            window.location.href ="https://jesusai.netlify.app/";
         }
     };
 
