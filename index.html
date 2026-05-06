@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>SunaihaScriptureAi | Biblical Intelligence</title>
     
     <!-- Dependencies: Tailwind, FontAwesome, Marked.js -->
@@ -86,7 +85,7 @@
                 Sunaiha Sabir
                 
                     
-                
+                        </a>
                 </p>
             </div>
         </div>
@@ -129,14 +128,8 @@
     import { Groq } from "https://esm.run/groq-sdk";
 
     // CONFIGURATION
-   const API_KEY = "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";
-    //const API_KEY = "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";
-//const API_KEY = "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";
-        
-        
-
-
-        
+    const API_KEY = window.process?.env?.GROQ_API_KEY || 
+                    import.meta.env?.GROQ_API_KEY ||window.GROQ_API_KEY || "";
     const groq = new Groq({ apiKey: API_KEY, dangerouslyAllowBrowser: true });
     const STORAGE_KEY = "sunaiha_scripture_v3";
 
@@ -150,7 +143,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         if (chatLog.length === 0) {
-            pushMessage('assistant', "🙏 Welcome to **SunaihaScriptureAi**. I am your professional Biblical Scholar. \n\n analyze your moods with scripture, and provide deep historical insights in any language. How can I assist your study today?");
+            pushMessage('assistant', "🙏 Welcome to **SunaihaScriptureAi**. I am your professional Biblical Scholar. \n\nI can compare Prophets, analyze your moods with scripture, and provide deep historical insights in any language. How can I assist your study today?");
         } else {
             chatLog.forEach(m => displayUI(m.role, m.content, false));
         }
@@ -218,7 +211,7 @@
 
         } catch (err) {
             loader.classList.add('hidden');
-            displayUI('assistant', "⚠️ **Connection Error:** " + "plz try again in 11mints");
+            displayUI('assistant', "⚠️ **Connection Error:** " + err.message);
         }
     };
 
